@@ -1,0 +1,4 @@
+﻿  Printing_Queue.cpp
+C:\Users\NDunaev\source\repos\Printing_Queue\Printing_Queue.cpp(132,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\Users\NDunaev\source\repos\Printing_Queue\Printing_Queue.cpp(133,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Printing_Queue.vcxproj -> C:\Users\NDunaev\source\repos\Printing_Queue\x64\Debug\Printing_Queue.exe
