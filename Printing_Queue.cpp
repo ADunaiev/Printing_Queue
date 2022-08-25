@@ -20,7 +20,11 @@ public:
     Customer(std::string nameP, std::string surnameP, int priorityP);
     Customer();
     std::string Get_Name() const;
+    std::string Get_Surname() const;
     int Get_priority() const;
+    void show() const;
+    Customer& operator=(const Customer& object);
+    void Set_Priority(int c);
 };
 
 Customer::Customer(std::string nameP, std::string surnameP, int priorityP) :
@@ -28,19 +32,78 @@ Customer::Customer(std::string nameP, std::string surnameP, int priorityP) :
 Customer::Customer() : Customer("", "", 0){}
 std::string Customer::Get_Name() const
 {
-    return name + " " + surname;
+    return name;
+}
+std::string Customer::Get_Surname() const
+{
+    return surname;
 }
 int Customer::Get_priority() const
 {
     return priority;
 }
+void Customer::show() const
+{
+    std::cout << name << " " << surname << " priority " << priority << std::endl;
+}
+Customer& Customer::operator=(const Customer& object)
+{
+    if (!(this == &object))
+    {
+        name = object.name;
+        surname = object.surname;
+        priority = object.priority;
+    }
+    return *this;
+}
+void Customer::Set_Priority(int c)
+{
+    priority = c;
+}
+
+class Print_Request
+{
+    int time;
+    Customer customer;
+public:
+    Print_Request(Customer customerP, int timeP);
+    Print_Request();
+    int Get_time() const;
+    Customer Get_Customer() const;
+    void show() const;
+    Print_Request& operator=(const Print_Request& object);
+};
+Print_Request::Print_Request(Customer customerP, int timeP) :
+    time{ timeP }
+{
+    customer = Customer(customerP.Get_Name(), customerP.Get_Surname(),
+        customerP.Get_priority());
+}
+Print_Request::Print_Request() : Print_Request(Customer(), 0){}
+int Print_Request::Get_time() const
+{
+    return time;
+}
+Customer Print_Request::Get_Customer() const
+{
+    return customer;
+}
+void Print_Request::show() const
+{
+    std::cout << "Print Reuqest sent by ";
+    customer.show();
+    std::cout << " at " << time << std::endl;       
+}
+Print_Request& Print_Request::operator=(const Print_Request& object)
+{
+    time = object.time;
+    customer = object.customer;
+}
 
 class QueuePriority
 {
     //Очередь
-    Customer* Wait;
-    //Приоритет
-    int* Pri;
+    Print_Request* Wait;
     //Максимальный размер очереди
     int MaxQueueLength;
     //Текущий размер очереди
@@ -51,9 +114,9 @@ public:
     //Деструктор
     ~QueuePriority();
     //Добавление элемента
-    void Add(int c, int p);
+    void Add(Print_Request c, int p);
     //Извлечение элемента
-    int Extract();
+    Print_Request Extract();
     //Очистка очереди
     void Clear();
     //Проверка существования элементов в очереди
@@ -70,7 +133,8 @@ void QueuePriority::Show() {
     std::cout << "\n-----------------------------------\n"; //демонстрация очереди
     for (int i = 0; i < QueueLength; i++)
     {
-        std::cout << Wait[i] << " - " << Pri[i] << "\n\n";
+        Wait[i].show();
+        std::cout << "\n";
     }
     std::cout << "\n-----------------------------------\n";
  }
@@ -78,15 +142,13 @@ QueuePriority::~QueuePriority()
 {
     //удаление очереди
     delete[]Wait;
-    delete[]Pri;
 }
 QueuePriority::QueuePriority(int m)
 {
     //получаем размер
     MaxQueueLength = m;
     //создаем очередь
-    Wait = new int[MaxQueueLength];
-    Pri = new int[MaxQueueLength];
+    Wait = new Print_Request[MaxQueueLength];
     //Изначально очередь пуста
     QueueLength = 0;
 }
@@ -110,46 +172,46 @@ int QueuePriority::GetCount()
     //Количество присутствующих в стеке элементов
     return QueueLength;
 }
-void QueuePriority::Add(int c, int p)
+void QueuePriority::Add(Print_Request c, int p)
 {
     //Если в очереди есть свободное место,
     //то увеличиваем количество
     //значений и вставляем новый элемент
     if (!IsFull()) {
         Wait[QueueLength] = c;
-        Pri[QueueLength] = p;
+        Wait[QueueLength].Get_Customer().Set_Priority(p);
         QueueLength++;
     }
 }
-int QueuePriority::Extract()
+Print_Request QueuePriority::Extract()
 {
     //Если в очереди есть элементы, то возвращаем тот, //у которого наивысший приоритет и сдвигаем очередь 
     if(!IsEmpty()){
         //пусть приоритетный элемент - нулевой
-        int max_pri = Pri[0];
+        int max_pri = Wait[0].Get_Customer().Get_priority();
         //а приоритетный индекс = 0
         int pos_max_pri = 0;
         //ищем приоритет
          for (int i = 1; i < QueueLength; i++)    
         //если встречен более приоритетный элемент 
-            if(max_pri<Pri[i]){
-                max_pri = Pri[i];
+            if(max_pri < Wait[i].Get_Customer().Get_priority()) {
+                max_pri = Wait[i].Get_Customer().Get_priority();
                 pos_max_pri = i;
             }
         //вытаскиваем приоритетный элемент
-        int temp1 = Wait[pos_max_pri];
-        int temp2 = Pri[pos_max_pri];
+        Print_Request temp1 = Wait[pos_max_pri];
+        int temp2 = Wait[pos_max_pri].Get_Customer().Get_priority();
         //сдвинуть все элементы
         for (int i = pos_max_pri; i < QueueLength - 1; i++) {
             Wait[i] = Wait[i + 1];
-            Pri[i] = Pri[i + 1];
+            Wait[i].Get_Customer().Set_Priority(Wait[i + 1].Get_Customer().Get_priority());
         }
         //уменьшаем количество
         QueueLength--;
         //возврат извлеченного элемента
         return temp1;
     }
-    else return -1; 
+    else return Print_Request();
 }
 
 void main()
