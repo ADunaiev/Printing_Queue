@@ -25,6 +25,8 @@ public:
     void show() const;
     Customer& operator=(const Customer& object);
     void Set_Priority(int c);
+    void Set_Name(std::string nampeP);
+    void Set_Surname(std::string surnameP);
 };
 
 Customer::Customer(std::string nameP, std::string surnameP, int priorityP) :
@@ -44,7 +46,7 @@ int Customer::Get_priority() const
 }
 void Customer::show() const
 {
-    std::cout << name << " " << surname << " priority " << priority << std::endl;
+    std::cout << name << " " << surname << " priority " << priority;
 }
 Customer& Customer::operator=(const Customer& object)
 {
@@ -59,6 +61,14 @@ Customer& Customer::operator=(const Customer& object)
 void Customer::Set_Priority(int c)
 {
     priority = c;
+}
+void Customer::Set_Name(std::string nameP)
+{
+    name = nameP;
+}
+void Customer::Set_Surname(std::string surnameP)
+{
+    surname = surnameP;
 }
 
 class Print_Request
@@ -98,6 +108,7 @@ Print_Request& Print_Request::operator=(const Print_Request& object)
 {
     time = object.time;
     customer = object.customer;
+    return *this;
 }
 
 class QueuePriority
@@ -134,7 +145,6 @@ void QueuePriority::Show() {
     for (int i = 0; i < QueueLength; i++)
     {
         Wait[i].show();
-        std::cout << "\n";
     }
     std::cout << "\n-----------------------------------\n";
  }
@@ -216,20 +226,38 @@ Print_Request QueuePriority::Extract()
 
 void main()
 {
-    srand(time(0));
-    //создание очереди
-    QueuePriority QUP(25);
-    //заполнение части элементов
-    for (int i = 0; i < 5; i++) {
-        //значения от 0 до 99 (включительно)
-        //и приоритет от 0 до 11 (включительно)
-        QUP.Add(rand() % 100, rand() % 12);
+    srand(time(NULL));
+    Customer Group[]{ {"Ivan", "Ivanov", 5},
+            { "Vasilii", "Petrov", 1 },
+            { "John", "Smith", 2 },
+            { "Maria", "Ivanovna", 3 },
+            { "Fedor", "Arbuzov", 2 } };
+
+    QueuePriority Waiting(100);
+    QueuePriority Printed(100);
+
+    Print_Request PR[20];
+
+    for (int i = 0; i < 20; i++)
+    {
+        int temp = rand() % 5;
+        PR[i] = Print_Request(Group[temp], i);
+        Waiting.Add(PR[i], PR[i].Get_Customer().Get_priority());
     }
 
-    //показ очереди
-    QUP.Show();
-    //извлечение элемента
-    QUP.Extract();
-    //показ очереди
-    QUP.Show();
+    std::cout << "Queue of printing requests:";
+    Waiting.Show();
+
+    for (int i = 20; i < 30; i++)
+    {
+        Print_Request temp = Waiting.Extract();
+        Printed.Add(temp, temp.Get_Customer().Get_priority());
+    }
+
+    std::cout << "Queue of printing requests:";
+    Waiting.Show();
+
+    std::cout << "Statistic of rinted requests:";
+    Printed.Show();
+
 }
